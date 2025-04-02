@@ -1285,5 +1285,49 @@ document.getElementById("addToBrowserBtn").addEventListener("click", function() 
     }
 }); </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}</script>
+<script>
+let deferredPrompt;
+
+// Listen for Chrome's install prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+// Handle button click
+document.getElementById('addToBrowserBtn').addEventListener('click', async () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    alert('App is already installed!');
+    return;
+  }
+
+  if (deferredPrompt) {
+    // Trigger install prompt
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted install');
+      // On Windows, Chrome asks: "Create desktop shortcut?"
+      if (/Windows/.test(navigator.userAgent)) {
+        alert('Check "Create desktop shortcut" in the install dialog!');
+      }
+    }
+  } else {
+    // Fallback instructions
+    alert(`To install:
+      - Chrome/Edge: Click the "Install" button in the address bar
+      - Windows: Check "Create desktop shortcut"
+      - macOS: Drag from "Applications > Chrome Apps" to Dock
+      - Linux: Create shortcut manually`);
+  }
+}); </script>
+
 </body>
 </html>
